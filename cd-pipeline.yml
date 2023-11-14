@@ -1,0 +1,42 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Vous pouvez spécifier la branche sur laquelle vous souhaitez déclencher le pipeline
+
+jobs:
+  deploy:
+    name: Deploy and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Start Docker Compose
+        run: |
+          docker-compose up -d
+          sleep 10  # Attendre un peu pour que les services démarrent
+        working-directory: ./path/to/your/docker-compose-directory
+
+      - name: Run Unit Tests
+        run: |
+          docker exec -it your-container-name python -m unittest discover
+        working-directory: ./path/to/your/app-directory
+        continue-on-error: true  # Continuez même si les tests échouent pour exécuter les tests de charge
+
+      - name: Run Load and Stress Tests (Bonus)
+        run: |
+          # Installer k6.io
+          curl -sSfL https://install.k6.io | sh
+          
+          # Exécuter les tests de charge avec k6.io
+          k6 run your-load-and-stress-tests.js
+        working-directory: ./path/to/your/tests-directory
+        continue-on-error: true  # Continuez même si les tests échouent
+
+      - name: Stop Docker Compose
+        run: |
+          docker-compose down
+        working-directory: ./path/to/your/docker-compose-directory
