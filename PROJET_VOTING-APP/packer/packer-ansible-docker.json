@@ -1,0 +1,19 @@
+{
+    "builders": [
+        {
+            "type": "docker",
+            "image": "ubuntu:latest",
+            "commit": true,
+            "changes": [ "CMD [\"/usr/sbin/sshd\", \"-D\"]" ]
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "ansible",
+            "playbook_file": "install-voting-app.yml",
+            "extra_arguments": [ "--extra-vars", "@secrets.json" ],
+            "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False" ],
+            "ansible_ssh_timeout": "20m"
+        }
+    ]
+}

@@ -1,0 +1,30 @@
+---
+- name: Copier le code de voting-app et installer les dépendances
+  hosts: 192.168.30.130
+  become: yes
+  become_user: ansible
+  tasks:
+    - name: Vérifier si Python est installé
+      command: "python3 --version"
+      register: python_version
+      ignore_errors: yes
+
+    - name: Installer Python si nécessaire
+      raw: "apt-get -y install python3"
+      when: python_version.rc != 0
+
+    - name: Copier le code de voting-app
+      copy:
+        src: C:\Users\andre\Documents\ETUDES\YNOV_Bachelor_Cyber\DEVOPS\PROJET_VOTING-APP\voting-app
+        dest: ~/Documents/ANSIBLE_VOTING-APP/
+      register: copy_result
+
+    - name: Vérifier la copie
+      fail:
+        msg: "Échec de la copie du code de voting-app"
+      when: not copy_result.failed
+
+    - name: Installer les dépendances
+      command: "pip install -r ~/Documents/ANSIBLE_VOTING-APP/requirements.txt"
+      args:
+        creates: ~/Documents/ANSIBLE_VOTING-APP/venv
